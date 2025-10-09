@@ -46,7 +46,7 @@ int cache_size;
 int main(int argc, char* argv[]){
     int client_socketId; //socket id for the client
     int client_len; //length of the client address
-    struct sockaddr server_addr, client_addr; //server and client address structures
+    struct sockaddr_in server_addr, client_addr; //server and client address structures
     sem_init(&semaphore,0,MAX_CLIENTS); //initialize semaphore
 
     //initialize mutex
@@ -72,4 +72,34 @@ int main(int argc, char* argv[]){
         print("Error in setting socket options\n");
         exit(1);
     }
+    bzero((char*)&server_addr,sizeof(server_addr)); //clear the server address structure
+    server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(port_number); // Assigning port to the Proxy
+	server_addr.sin_addr.s_addr = INADDR_ANY; // Any available adress assigned
+    if(bind(proxy_socketId,(struct sockaddr*)&server_addr,sizeof(server_addr)<0)){
+        perror("Error in binding\n");
+        exit(1);
+    }
+    printf("Proxy Server is running on port %d\n",port_number);
+    int listen_status=listen(proxy_socketId,MAX_CLIENTS);
+    if(listen_status<0){
+        perror("Error in listening\n");
+        exit(1);
+    }
+    int i=0;
+    int Connected_socketId[MAX_CLIENTS]; //array to store the connected socket ids
+    while(1){
+        bzero((char*)&client_addr,sizeof(client_addr)); //clear the client address structure
+        client_len=sizeof(client_addr);
+        client_socketId=accept(proxy_socketId,(struct sockaddr*)&client_addr,(socklen_t*)&client_len);
+        if(client_socketId<0){
+            perror("Error in accepting connection\n");
+            exit(1);
+        }
+        else{
+            Connected_socketId[i]=client_socketId;
+        }
+        
+    }
+
 }
