@@ -62,5 +62,14 @@ int main(int argc, char* argv[]){
 
     print("Starting Proxy Server on port %d\n",port_number);
     //Create socket
-    
+    proxy_socketId=socket(AF_INET,SOCK_STREAM,0);
+    if(proxy_socketId<0){
+        print("Error in creating socket\n");
+        exit(1);
+    }
+    int reuse=1;
+    if(setsockopt(proxy_socketId,SOL_SOCKET,SO_REUSEADDR,(const char*)&reuse,sizeof(reuse))<0){
+        print("Error in setting socket options\n");
+        exit(1);
+    }
 }
