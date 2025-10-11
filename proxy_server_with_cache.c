@@ -42,7 +42,9 @@ pthread_mutex_t lock;
 
 cache_element* head; //head of the cache linked list
 int cache_size;
-
+void *thread_fn(void *socketNew){
+    sem_wait(&semaphore); //wait for the semaphore
+}
 int main(int argc, char* argv[]){
     int client_socketId; //socket id for the client
     int client_len; //length of the client address
@@ -102,7 +104,14 @@ int main(int argc, char* argv[]){
         struct sockaddr_in* client_pt = (struct sockaddr_in*)&client_addr;
         struct in_addr ip_addr=client_pt->sin_addr;
         char str[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET,&ip_addr,str,sizeof(str));
+        inet_ntop(AF_INET,&ip_addr,str,INET6_ADDRSTRLEN);
+        printf("Client is connected with port number %d and IP address %s\n",ntohs(client_pt->sin_port),str);
+
+
+        pthread_create(&tid[i],NULL,thread_fn,(void*)&Connected_socketId[i]);
+        i++;
     }
+    close(proxy_socketId);
+    return 0;
 
 }
